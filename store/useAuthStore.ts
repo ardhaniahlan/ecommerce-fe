@@ -1,4 +1,5 @@
 import { User } from "@/types/user.types";
+
 import { create } from "zustand";
 
 interface AuthState {
@@ -9,7 +10,7 @@ interface AuthState {
   setAddress: (address: string) => void;
 }
 
-export const useAuthStore = create<AuthState>((set) => ({
+export const useAuthStore = create<AuthState>()((set) => ({
   isAuthenticated: false,
   user: null,
 

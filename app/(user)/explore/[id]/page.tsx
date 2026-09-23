@@ -5,7 +5,6 @@ import CountdownTimer from "@/components/product/CountdownTimer";
 import PriceBlock from "@/components/product/PriceBlock";
 import QuantitySelector from "@/components/product/QuantitySelector";
 import { getProductById } from "@/services/product.service";
-import { useAuthStore } from "@/store/useAuthStore";
 import { Product, ProductImage } from "@/types/product.types";
 import {
   ArrowLeft,
@@ -17,6 +16,7 @@ import {
 import Image from "next/image";
 import { useParams, useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
+import { useAuthStore } from "@/store/useAuthStore";
 
 export default function ProductDetailPage() {
   const router = useRouter();
@@ -24,7 +24,7 @@ export default function ProductDetailPage() {
   const params = useParams();
   const id = params.id as string;
 
-  const { user, isAuthenticated } = useAuthStore();
+  const { isAuthenticated } = useAuthStore();
   const [showLoginModal, setShowLoginModal] = useState(false);
 
   const [product, setProduct] = useState<Product | null>(null);
