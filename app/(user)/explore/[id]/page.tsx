@@ -5,6 +5,7 @@ import CountdownTimer from "@/components/product/CountdownTimer";
 import PriceBlock from "@/components/product/PriceBlock";
 import QuantitySelector from "@/components/product/QuantitySelector";
 import { getProductById } from "@/services/product.service";
+import { useAuthStore } from "@/store/useAuthStore";
 import { Product, ProductImage } from "@/types/product.types";
 import {
   ArrowLeft,
@@ -22,6 +23,9 @@ export default function ProductDetailPage() {
 
   const params = useParams();
   const id = params.id as string;
+
+  const { user, isAuthenticated } = useAuthStore();
+  const [showLoginModal, setShowLoginModal] = useState(false);
 
   const [product, setProduct] = useState<Product | null>(null);
   const [loading, setLoading] = useState(true);
@@ -98,6 +102,19 @@ export default function ProductDetailPage() {
       fetchProductDetail();
     }
   }, [id]);
+
+  const handleAddToCart = async () => {
+    if (!isAuthenticated) {
+      setShowLoginModal(true);
+      return;
+    }
+
+    try {
+      alert("Berhasil ditambahkan ke keranjang!");
+    } catch (error) {
+      console.error("Gagal menambah ke keranjang", error);
+    }
+  };
 
   if (loading) {
     return <DetailProductLoad />;
@@ -217,7 +234,10 @@ export default function ProductDetailPage() {
 
           <div className="flex gap-4 mt-8">
             <QuantitySelector />
-            <button className="flex-1 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-lg flex items-center justify-center gap-2 transition-colors">
+            <button
+              onClick={handleAddToCart}
+              className="flex-1 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-lg flex items-center justify-center gap-2 transition-colors"
+            >
               <ShoppingCart className="w-5 h-5" />
               Add to Cart
             </button>
@@ -236,6 +256,36 @@ export default function ProductDetailPage() {
           </div>
         </div>
       </div>
+
+      {showLoginModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm">
+          <div className="bg-white p-6 rounded-2xl shadow-xl max-w-sm w-full mx-4">
+            <h3 className="text-xl font-bold text-gray-900 mb-2">
+              Login Diperlukan
+            </h3>
+            <p className="text-gray-600 mb-6">
+              Silakan login terlebih dahulu untuk menyimpan produk ini ke
+              keranjang belanja Anda.
+            </p>
+            <div className="flex gap-3">
+              <button
+                onClick={() => setShowLoginModal(false)}
+                className="flex-1 px-4 py-2 text-gray-600 font-medium hover:bg-gray-100 rounded-lg transition"
+              >
+                Nanti Saja
+              </button>
+              <button
+                onClick={() =>
+                  router.push(`/auth/login?returnUrl=/explore/${product.id}`)
+                }
+                className="flex-1 px-4 py-2 bg-blue-600 text-white font-medium hover:bg-blue-700 rounded-lg transition"
+              >
+                Lanjut Login
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
