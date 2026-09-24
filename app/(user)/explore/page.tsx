@@ -56,9 +56,9 @@ export default function ExplorePage() {
       )}
 
       <div className="flex justify-between items-end text-2xl font-bold text-black mt-6 py-4">
-        <span>Flagship Hardware Collection</span>
+        <span>Koleksi Perangkat Keras Flagship</span>
         <p className="text-sm font-normal text-neutral-500">
-          Showing {currentProducts.length} of {totalItems} products
+          Menampilkan {currentProducts.length} dari {totalItems} produk
         </p>
       </div>
 

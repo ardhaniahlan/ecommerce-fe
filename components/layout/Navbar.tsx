@@ -1,20 +1,44 @@
 "use client";
 
 import Link from "next/link";
-import { LogOut, Search, ShoppingCart, StoreIcon, UserIcon, X } from "lucide-react";
+import {
+  LogOut,
+  Search,
+  ShoppingCart,
+  StoreIcon,
+  UserIcon,
+  X,
+} from "lucide-react";
 import SearchBar from "@/components/search/SearchBar";
 import { useState, useEffect, useRef } from "react";
 import { useAuthStore } from "@/store/useAuthStore";
-import { useRouter } from "next/navigation";
 import Cookies from "js-cookie";
+import { useCartStore } from "@/store/useCartStore";
+import BaseModal from "../modal/BaseModal";
+import { useRouter } from "next/navigation";
+import ModalFooterActions from "../modal/ModalFooterActions";
+import NavbarCartIcon from "../cart/NavbarCartIcon";
 
 export default function Navbar({ initialUser }: { initialUser: any }) {
+  const router = useRouter();
+
+  const { totalItems, fetchCart, clearCart } = useCartStore();
 
   const { user, isAuthenticated, login, logout } = useAuthStore();
   const [isMobileSearchOpen, setIsMobileSearchOpen] = useState(false);
 
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
+
+  const [isModalOpen, setIsModalOpen] = useState(false);
+
+  useEffect(() => {
+    if (isAuthenticated) {
+      fetchCart();
+    } else {
+      clearCart();
+    }
+  }, [isAuthenticated, fetchCart, clearCart]);
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -54,6 +78,13 @@ export default function Navbar({ initialUser }: { initialUser: any }) {
     }
   };
 
+  const handleCartClick = (e: React.MouseEvent) => {
+    if (!isAuthenticated) {
+      e.preventDefault();
+      setIsModalOpen(true);
+    }
+  };
+
   return (
     <header className="sticky top-0 z-50 w-full bg-white border-b border-gray-100 py-2">
       <div className="container mx-auto px-4 h-16 flex items-center justify-between gap-4 md:gap-8 relative">
@@ -78,12 +109,30 @@ export default function Navbar({ initialUser }: { initialUser: any }) {
                 <Search className="w-6 h-6" />
               </button>
 
-              <button className="relative text-gray-700 hover:text-blue-600 transition-colors">
-                <ShoppingCart className="w-6 h-6" />
-                <span className="absolute -top-1.5 -right-2 bg-[#dc2626] text-white text-[11px] font-bold w-5 h-5 flex items-center justify-center rounded-full border-2 border-white">
-                  3
-                </span>
-              </button>
+              <NavbarCartIcon />
+
+              <BaseModal
+                isOpen={isModalOpen}
+                onClose={() => setIsModalOpen(false)}
+                title="Masuk ke Akun"
+                description="Silakan masuk ke akun Anda terlebih dahulu untuk melihat isi keranjang belanja."
+                footer={
+                  <ModalFooterActions
+                    cancelText="Nanti Saja"
+                    confirmText="Login Sekarang"
+                    onCancel={() => setIsModalOpen(false)}
+                    onConfirm={() => {
+                      setIsModalOpen(false);
+                      router.push("/auth/login?returnUrl=/cart");
+                    }}
+                  />
+                }
+              >
+                <p className="text-gray-600 text-sm">
+                  Silakan masuk ke akun Anda terlebih dahulu untuk melihat isi
+                  keranjang belanja.
+                </p>
+              </BaseModal>
 
               {isLogin ? (
                 <div className="relative" ref={dropdownRef}>

@@ -38,40 +38,39 @@ function LoginForm() {
     setErrorMsg("");
 
     try {
-        const res = await loginUser(formData);
-        const token = res.data?.token;
+      const res = await loginUser(formData);
+      const token = res.data?.token;
 
-        if (token) {
-            const cookieOptions = {
-                secure: process.env.NODE_ENV === "production", 
-                sameSite: "strict" as const, 
-                path: "/",
-                expires: 7 
-            };
+      if (token) {
+        const cookieOptions = {
+          secure: process.env.NODE_ENV === "production",
+          sameSite: "strict" as const,
+          path: "/",
+          expires: 7,
+        };
 
-            Cookies.set("token", token, cookieOptions);
-            
-            const profileRes = await getUserProfile();
-            const userData = profileRes.data; 
+        Cookies.set("token", token, cookieOptions);
 
-            if (userData) {
-                Cookies.set("user_session", JSON.stringify(userData), cookieOptions);
-                login(userData);
-                
-                router.push(returnUrl);
-            } else {
-                setErrorMsg("Gagal mendapatkan data profil dari server.");
-            }
+        const profileRes = await getUserProfile();
+        const userData = profileRes.data;
 
+        if (userData) {
+          Cookies.set("user_session", JSON.stringify(userData), cookieOptions);
+          login(userData);
+
+          router.push(returnUrl);
         } else {
-            setErrorMsg("Email atau kata sandi salah.");
+          setErrorMsg("Gagal mendapatkan data profil dari server.");
         }
+      } else {
+        setErrorMsg("Email atau kata sandi salah.");
+      }
     } catch (error: any) {
-        setErrorMsg(error.message);
+      setErrorMsg(error.message);
     } finally {
-        setIsLoading(false);
+      setIsLoading(false);
     }
-};
+  };
 
   return (
     <div className="min-h-screen flex w-full bg-white">

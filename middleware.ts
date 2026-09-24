@@ -6,7 +6,8 @@ export function middleware(request: NextRequest) {
 
   const isAuthPage = pathname.startsWith("/auth/login") || pathname.startsWith("/auth/register");
 
-  const isProtectedPage = pathname.startsWith("/checkout") || pathname.startsWith("/profile");
+  const isProtectedPage = pathname.startsWith("/checkout") || pathname.startsWith("/profile") || pathname.startsWith("/cart") || pathname.startsWith("/orders");
+  
   if (token && isAuthPage) {
     return NextResponse.redirect(new URL("/", request.url));
   }

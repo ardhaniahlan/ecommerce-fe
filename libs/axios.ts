@@ -23,11 +23,17 @@ api.interceptors.request.use(
 api.interceptors.response.use(
   (response) => response,
   (error) => {
+    const originalRequest = error.config;
+    
     if (error.response && error.response.status === 401) {
-      Cookies.remove("token");
       
-      if (typeof window !== "undefined") {
-        window.location.href = "/auth/login";
+      if (originalRequest.url && !originalRequest.url.includes("/auth/login")) {
+        Cookies.remove("token");
+        Cookies.remove("user_session");
+        
+        if (typeof window !== "undefined") {
+          window.location.href = "/explore"; 
+        }
       }
     }
     

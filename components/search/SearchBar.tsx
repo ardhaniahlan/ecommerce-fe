@@ -66,7 +66,7 @@ export default function SearchBar() {
           onFocus={() => {
             if (searchResults.length > 0) setIsDropdownOpen(true);
           }}
-          placeholder="Search tech gadgets, monitors, audio..."
+          placeholder="Cari tech gadgets, monitors, audio..."
           className="w-full bg-[#f1f5f9] border border-[#e2e8f0] rounded-xl py-2.5 pl-12 pr-10 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all text-gray-700"
         />
         {isSearching && (

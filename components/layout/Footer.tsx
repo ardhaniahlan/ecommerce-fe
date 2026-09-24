@@ -1,5 +1,3 @@
-import Link from 'next/link';
-
 export default function Footer() {
   const currentYear = new Date().getFullYear();
 
@@ -10,7 +8,7 @@ export default function Footer() {
           
           <div className="flex items-center gap-1 text-center md:text-left">
             <span className="font-semibold text-gray-700">Tech-Commerce</span>
-            <span>© {currentYear} Tech-Commerce Inc. Precision hardware engineered for creators.</span>
+            <span>© {currentYear} Tech-Commerce Inc. Perangkat Keras Presisi Didesain Untuk Kreator.</span>
           </div>
 
         </div>

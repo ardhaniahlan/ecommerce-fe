@@ -2,6 +2,7 @@
 
 import Image from "next/image";
 import { Product } from "@/types/product.types";
+import { formatRupiah } from "@/utils/format";
 
 interface ProductCardProps {
   product: Product;
@@ -9,30 +10,29 @@ interface ProductCardProps {
 
 export default function ProductCard({ product }: ProductCardProps) {
   const hasDiscount = Number(product.discount_percentage) > 0;
-  
+
   const finalPrice = product.price;
 
   const originalPrice = hasDiscount
-    ? product.price / (1 - (Number(product.discount_percentage) / 100))
+    ? product.price / (1 - Number(product.discount_percentage) / 100)
     : product.price;
 
   const stockStatus =
     product.stock === 0
-      ? "Out of Stock"
+      ? "Stok Habis"
       : product.stock < 5
-        ? `Low Stock (Only ${product.stock} left)`
-        : "In Stock";
-        
+        ? `Stok Menipis (Sisa ${product.stock})`
+        : "Stok Tersedia";
+
   const stockColor =
     product.stock === 0
       ? "text-gray-500"
       : product.stock < 5
-        ? "text-[#c52828]" 
+        ? "text-[#c52828]"
         : "text-green-600";
 
   return (
     <div className="flex flex-col p-4 border border-gray-100 rounded-2xl hover:shadow-lg transition-shadow bg-white">
-      
       <div className="relative w-full aspect-square bg-gray-50 rounded-xl overflow-hidden mb-4 hover:scale-105 transition-transform duration-200">
         <Image
           src={product.primary_image || "/placeholder.png"}
@@ -47,12 +47,11 @@ export default function ProductCard({ product }: ProductCardProps) {
       </h3>
 
       <div className="mt-auto flex flex-col gap-3">
-        
         <div className="flex flex-col">
           {hasDiscount && (
             <div className="flex items-center gap-2 mb-1">
               <span className="text-[15px] text-gray-400 line-through font-medium">
-                ${originalPrice.toFixed(2)}
+                {formatRupiah(originalPrice)}
               </span>
               <span className="text-[12px] font-bold text-white bg-[#dc3545] px-2.5 py-0.5 rounded-full tracking-wide">
                 {product.discount_percentage}% OFF
@@ -60,7 +59,7 @@ export default function ProductCard({ product }: ProductCardProps) {
             </div>
           )}
           <p className="text-[22px] font-bold text-slate-900 leading-none">
-            ${finalPrice.toFixed(2)}
+            {formatRupiah(finalPrice)}
           </p>
         </div>
 
@@ -72,7 +71,6 @@ export default function ProductCard({ product }: ProductCardProps) {
             {stockStatus}
           </span>
         </div>
-        
       </div>
     </div>
   );

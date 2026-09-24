@@ -17,6 +17,10 @@ import Image from "next/image";
 import { useParams, useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 import { useAuthStore } from "@/store/useAuthStore";
+import { useCartStore } from "@/store/useCartStore";
+import { addToCartAPI } from "@/services/cart.service";
+import BaseModal from "@/components/modal/BaseModal";
+import ModalFooterActions from "@/components/modal/ModalFooterActions";
 
 export default function ProductDetailPage() {
   const router = useRouter();
@@ -26,6 +30,10 @@ export default function ProductDetailPage() {
 
   const { isAuthenticated } = useAuthStore();
   const [showLoginModal, setShowLoginModal] = useState(false);
+  const [showSuccessModal, setShowSuccessModal] = useState(false);
+
+  const { fetchCart, addOptimisticItem, rollbackOptimisticItem } = useCartStore();
+  const [qty, setQty] = useState(1);
 
   const [product, setProduct] = useState<Product | null>(null);
   const [loading, setLoading] = useState(true);
@@ -109,10 +117,21 @@ export default function ProductDetailPage() {
       return;
     }
 
+    addOptimisticItem(Number(product?.id));
+    
+    setShowSuccessModal(true);
+
     try {
-      alert("Berhasil ditambahkan ke keranjang!");
+      await addToCartAPI(Number(product?.id), qty);
+      
+      await fetchCart(); 
     } catch (error) {
       console.error("Gagal menambah ke keranjang", error);
+      
+      rollbackOptimisticItem(Number(product?.id));
+      
+      setShowSuccessModal(false);
+      alert("Gagal menambahkan barang ke keranjang. Silakan coba lagi.");
     }
   };
 
@@ -197,7 +216,7 @@ export default function ProductDetailPage() {
           <div className="flex justify-between items-start mb-2">
             <span className="bg-green-100 text-green-800 text-xs font-semibold px-3 py-1 rounded-full flex items-center gap-1.5">
               <span className="w-1.5 h-1.5 bg-green-600 rounded-full"></span>
-              In Stock ({product.stock} units available)
+              Tersedia {product.stock} Stok
             </span>
           </div>
 
@@ -233,7 +252,11 @@ export default function ProductDetailPage() {
           )}
 
           <div className="flex gap-4 mt-8">
-            <QuantitySelector />
+            <QuantitySelector
+              qty={qty}
+              setQty={setQty}
+              maxStock={product.stock}
+            />
             <button
               onClick={handleAddToCart}
               className="flex-1 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-lg flex items-center justify-center gap-2 transition-colors"
@@ -258,34 +281,26 @@ export default function ProductDetailPage() {
       </div>
 
       {showLoginModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm">
-          <div className="bg-white p-6 rounded-2xl shadow-xl max-w-sm w-full mx-4">
-            <h3 className="text-xl font-bold text-gray-900 mb-2">
-              Login Diperlukan
-            </h3>
-            <p className="text-gray-600 mb-6">
-              Silakan login terlebih dahulu untuk menyimpan produk ini ke
-              keranjang belanja Anda.
-            </p>
-            <div className="flex gap-3">
-              <button
-                onClick={() => setShowLoginModal(false)}
-                className="flex-1 px-4 py-2 text-gray-600 font-medium hover:bg-gray-100 rounded-lg transition"
-              >
-                Nanti Saja
-              </button>
-              <button
-                onClick={() =>
-                  router.push(`/auth/login?returnUrl=/explore/${product.id}`)
-                }
-                className="flex-1 px-4 py-2 bg-blue-600 text-white font-medium hover:bg-blue-700 rounded-lg transition"
-              >
-                Lanjut Login
-              </button>
-            </div>
-          </div>
-        </div>
+        <BaseModal
+          isOpen={showLoginModal}
+          onClose={() => setShowLoginModal(false)}
+          title="Login Diperlukan"
+          description="Silakan login terlebih dahulu untuk menyimpan produk ini ke
+            keranjang belanja Anda."
+          footer={
+            <ModalFooterActions
+              cancelText="Nanti Saja"
+              confirmText="Lanjut Login"
+              onCancel={() => setShowLoginModal(false)}
+              onConfirm={() =>
+                router.push(`/auth/login?returnUrl=/explore/${product.id}`)
+              }
+            />
+          }
+        />
       )}
+
+      
     </div>
   );
 }
