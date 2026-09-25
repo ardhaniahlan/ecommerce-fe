@@ -2,10 +2,27 @@ import { useState, useEffect } from "react";
 import Link from "next/link";
 import { ShoppingCart } from "lucide-react";
 import { useCartStore } from "@/store/useCartStore";
+import { useAuthStore } from "@/store/useAuthStore";
+import { useRouter } from "next/navigation";
+import BaseModal from "../modal/BaseModal";
+import ModalFooterActions from "../modal/ModalFooterActions";
 
 export default function NavbarCartIcon() {
+  const router = useRouter();
+
   const { totalItems, cartBumpToggle } = useCartStore();
   const [isBumping, setIsBumping] = useState(false);
+
+  const { isAuthenticated } = useAuthStore();
+  const [isModalOpen, setIsModalOpen] = useState(false);
+
+  const handleCartClick = () => {
+    if (!isAuthenticated) {
+      setIsModalOpen(true);
+    } else {
+      router.push("/cart");
+    }
+  };
 
   useEffect(() => {
     if (cartBumpToggle === 0) return;
@@ -20,20 +37,42 @@ export default function NavbarCartIcon() {
   }, [cartBumpToggle]);
 
   return (
-    <Link href="/cart" className="relative text-gray-700 hover:text-blue-600 transition-colors">
-      <ShoppingCart className="w-6 h-6" />
-      
-      {totalItems > 0 && (
-        <span 
-          className={`
+    <>
+      <button
+        onClick={handleCartClick}
+        className="relative text-gray-700 hover:text-blue-600 transition-colors"
+      >
+        <ShoppingCart className="w-6 h-6" />
+
+        {totalItems > 0 && (
+          <span
+            className={`
             absolute -top-1.5 -right-2 bg-[#dc2626] text-white text-[11px] font-bold w-5 h-5 flex items-center justify-center rounded-full border-2 border-white
             transition-transform duration-300 ease-out
-            ${isBumping ? 'scale-150' : 'scale-100'} 
+            ${isBumping ? "scale-150" : "scale-100"} 
           `}
-        >
-          {totalItems}
-        </span>
-      )}
-    </Link>
+          >
+            {totalItems}
+          </span>
+        )}
+      </button>
+      <BaseModal
+        isOpen={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+        title="Masuk ke Akun"
+        description="Silakan masuk ke akun Anda terlebih dahulu untuk melihat isi keranjang belanja."
+        footer={
+          <ModalFooterActions
+            cancelText="Nanti Saja"
+            confirmText="Login Sekarang"
+            onCancel={() => setIsModalOpen(false)}
+            onConfirm={() => {
+              setIsModalOpen(false);
+              router.push("/auth/login?returnUrl=/cart");
+            }}
+          />
+        }
+      />
+    </>
   );
 }
